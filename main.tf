@@ -19,3 +19,11 @@ provider "aws" {
       s3             = "http://s3.localhost.localstack.cloud:4566"
   }
 }
+#create s3 bucket 
+resource "aws_s3_bucket" "s3_static_bucket" {
+  bucket = "s3static321456"
+
+  tags = {
+    Name        = "s3 static bucket"
+  }
+}
