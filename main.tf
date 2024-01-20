@@ -50,3 +50,31 @@ resource "aws_s3_bucket_acl" "s3_bucket_acl" {
   bucket = aws_s3_bucket.s3_static_bucket.id
   acl    = "public-read"
 }
+# Configure website configuration for the S3 bucket
+resource "aws_s3_bucket_website_configuration" "s3_static_bucket_website_configuration" {
+    bucket = aws_s3_bucket.s3_static_bucket.id
+
+    index_document {
+      suffix = "index.html"
+    }
+}
+# Process template files from the "web" directory
+module "template_files" {
+    source = "hashicorp/dir/template"
+
+    base_dir = "${path.module}/web"
+}
+# Upload files to the S3 bucket
+resource "aws_s3_object" "s3_static_bucket_files" {
+    bucket = aws_s3_bucket.s3_static_bucket.id
+
+    for_each = module.template_files.files
+
+    key          = each.key
+    content_type = each.value.content_type
+
+    source  = each.value.source_path
+    content = each.value.content
+
+    etag = each.value.digests.md5
+}
